@@ -68,7 +68,12 @@ class operador_minero extends Model
     public function email()
     {
         return $this->hasMany(Email::class,'id_operador_minero');
-    
+
+    }
+    // En tu modelo operador_minero.php, agrega esta función:
+    public function actualizaciones()
+    {
+        return $this->hasMany(ActualizacionOperador::class, 'operador_minero_id', 'id_operador_minero');
     }
 
     public function routeNotificationForMail(Notification $notification): array|string
