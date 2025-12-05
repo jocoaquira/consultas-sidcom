@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ActualizacionOperadorController;
+use App\Http\Controllers\EstadisticasController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -27,3 +28,10 @@ Route::post('actualizacion-operadors/importar', [ActualizacionOperadorController
 // Ruta para ver por operador específico
 Route::get('actualizacion-operadors/por-operador/{operadorId}', [ActualizacionOperadorController::class, 'porOperador'])
      ->name('actualizacion-operadors.por-operador');
+
+     // Rutas de estadísticas
+Route::prefix('estadisticas')->group(function () {
+    Route::get('/', [EstadisticasController::class, 'index'])->name('estadisticas.index');
+    Route::post('/consulta', [EstadisticasController::class, 'consultaPersonalizada'])->name('estadisticas.consulta');
+    Route::get('/semana', [EstadisticasController::class, 'consultaSemana'])->name('estadisticas.semana');
+});

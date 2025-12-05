@@ -16,8 +16,15 @@ class OperadorMineroController extends Controller
      */
     public function index()
     {
-        $operador=operador_minero::get();
-        return view("operador_minero.operador_minero", ["productos" => $operador]);
+        // Con paginación (20 registros por página)
+        $operador = operador_minero::query()
+            ->withCount(['usuario', 'email']) // Cargar conteos
+            ->orderBy('id_operador_minero', 'desc')
+            ->paginate(20);
+
+        return view("operador_minero.operador_minero", [
+            "productos" => $operador
+        ]);
     }
     public function mensajeOperador(operador_minero $operador):string{
         $mensaje='';
@@ -61,7 +68,7 @@ class OperadorMineroController extends Controller
             //return 'error';
             return redirect()->route('operadores.index')->with('error', 'No se pudo enviar.');
         }
-        
+
         //return redirect()->back();
     }
     /**
