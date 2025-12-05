@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0">
-            <i class="bi bi-pie-chart me-2"></i>Resultados de la Consulta Personalizada
+            <i class="bi bi-pie-chart me-2"></i>Resultados de la Consulta
             <span class="float-end">
                 <small>{{ $fechaInicio }} - {{ $fechaFin }}</small>
             </span>
@@ -16,22 +16,24 @@
                         <h2 class="display-3 text-primary">{{ $total }}</h2>
                         <h4 class="text-muted mb-3">
                             @if($tipo === 'I')
-                                Formularios de Comercio Interno
+                                <i class="bi bi-house-door me-2"></i>Comercio Interno (I)
                             @elseif($tipo === 'E')
-                                Formularios de Comercio Externo
+                                <i class="bi bi-globe me-2"></i>Comercio Externo (E)
                             @else
-                                Total de Formularios (Todos los tipos)
+                                <i class="bi bi-collection me-2"></i>Todos los Tipos de Comercio
                             @endif
                         </h4>
                         <div class="mb-3">
-                            <span class="badge bg-success fs-6">
-                                Estados incluidos: {{ implode(', ', $estados) }}
-                                @if($incluirEstado3)
-                                    <small class="ms-1">(incluye estado 3 adicionalmente)</small>
+                            @foreach($estados as $estado)
+                                @if(isset($estadosNombres[$estado]))
+                                <span class="badge bg-{{ $estado == '1' ? 'success' : ($estado == '2' ? 'warning' : ($estado == '3' ? 'info' : 'danger')) }} fs-6 me-2">
+                                    {{ $estadosNombres[$estado] }} ({{ $estado }})
+                                </span>
                                 @endif
-                            </span>
+                            @endforeach
                         </div>
                         <p class="lead mb-0">
+                            <i class="bi bi-calendar-range me-1"></i>
                             Período: <strong>{{ $fechaInicio }}</strong> al <strong>{{ $fechaFin }}</strong>
                         </p>
                     </div>
@@ -43,14 +45,20 @@
                         <div class="display-1 text-muted opacity-25">
                             <i class="bi bi-file-earmark-text"></i>
                         </div>
-                        <h5 class="mt-3">Consulta Completada</h5>
+                        <h5 class="mt-3">Consulta Finalizada</h5>
                         <p class="text-muted mb-0">{{ now()->format('d/m/Y H:i') }}</p>
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
+                                <i class="bi bi-printer me-1"></i>Imprimir
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Distribución por estado -->
+        @if($porEstado->count() > 0)
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -61,47 +69,51 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            @php
-                                $estadosLabels = [
-                                    '1' => ['label' => 'Emitidos', 'color' => 'success', 'icon' => 'check-circle'],
-                                    '2' => ['label' => 'Vencidos', 'color' => 'warning', 'icon' => 'clock-history'],
-                                    '3' => ['label' => 'Estado 3', 'color' => 'info', 'icon' => 'question-circle']
-                                ];
-                            @endphp
-
-                            @foreach($estados as $estado)
-                                @if(isset($porEstado[$estado]))
-                                    @php
-                                        $datos = $estadosLabels[$estado];
-                                        $totalEstado = $porEstado[$estado]->total;
-                                        $porcentaje = $total > 0 ? round(($totalEstado / $total) * 100, 1) : 0;
-                                    @endphp
-                                    <div class="col-md-4 mb-3">
-                                        <div class="card border-{{ $datos['color'] }}">
-                                            <div class="card-body text-center">
-                                                <div class="mb-2">
-                                                    <i class="bi bi-{{ $datos['icon'] }} fs-1 text-{{ $datos['color'] }}"></i>
-                                                </div>
-                                                <h4 class="text-{{ $datos['color'] }}">{{ $totalEstado }}</h4>
-                                                <h6 class="text-muted">{{ $datos['label'] }}</h6>
-                                                <div class="progress" style="height: 10px;">
-                                                    <div class="progress-bar bg-{{ $datos['color'] }}"
-                                                         style="width: {{ $porcentaje }}%"></div>
-                                                </div>
-                                                <small class="text-muted">{{ $porcentaje }}% del total</small>
+                            @foreach($porEstado as $estadoCodigo => $datosEstado)
+                                @php
+                                    $estadoNombre = $estadosNombres[$estadoCodigo] ?? "Estado {$estadoCodigo}";
+                                    $color = match($estadoCodigo) {
+                                        '1' => 'success',
+                                        '2' => 'warning',
+                                        '3' => 'info',
+                                        '0' => 'danger',
+                                        default => 'secondary'
+                                    };
+                                    $icono = match($estadoCodigo) {
+                                        '1' => 'check-circle',
+                                        '2' => 'clock-history',
+                                        '3' => 'question-circle',
+                                        '0' => 'x-circle',
+                                        default => 'circle'
+                                    };
+                                    $porcentaje = $total > 0 ? round(($datosEstado->total / $total) * 100, 1) : 0;
+                                @endphp
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card border-{{ $color }}">
+                                        <div class="card-body text-center py-4">
+                                            <div class="mb-2">
+                                                <i class="bi bi-{{ $icono }} fs-1 text-{{ $color }}"></i>
                                             </div>
+                                            <h3 class="text-{{ $color }} mb-1">{{ $datosEstado->total }}</h3>
+                                            <h6 class="text-muted mb-2">{{ $estadoNombre }}</h6>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-{{ $color }}"
+                                                     style="width: {{ $porcentaje }}%"></div>
+                                            </div>
+                                            <small class="text-muted">{{ $porcentaje }}%</small>
                                         </div>
                                     </div>
-                                @endif
+                                </div>
                             @endforeach
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        @endif
 
-        <!-- Si se seleccionó "Todos", mostrar distribución por tipo -->
-        @if($tipo === 'T' && $porTipo)
+        <!-- Distribución por tipo (si se seleccionó "Todos") -->
+        @if($tipo === 'T' && $porTipo && $porTipo->count() > 0)
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -112,36 +124,29 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            @php
-                                $tiposLabels = [
-                                    'I' => ['label' => 'Interno', 'color' => 'primary', 'icon' => 'house-door'],
-                                    'E' => ['label' => 'Externo', 'color' => 'info', 'icon' => 'globe']
-                                ];
-                            @endphp
-
                             @foreach($porTipo as $tipoComercio)
-                                @if(isset($tiposLabels[$tipoComercio->tipo_form_comercio]))
-                                    @php
-                                        $datos = $tiposLabels[$tipoComercio->tipo_form_comercio];
-                                        $porcentaje = $total > 0 ? round(($tipoComercio->total / $total) * 100, 1) : 0;
-                                    @endphp
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card border-{{ $datos['color'] }}">
-                                            <div class="card-body text-center">
-                                                <div class="mb-2">
-                                                    <i class="bi bi-{{ $datos['icon'] }} fs-1 text-{{ $datos['color'] }}"></i>
-                                                </div>
-                                                <h3 class="text-{{ $datos['color'] }}">{{ $tipoComercio->total }}</h3>
-                                                <h5 class="text-muted">Comercio {{ $datos['label'] }}</h5>
-                                                <div class="progress" style="height: 15px;">
-                                                    <div class="progress-bar bg-{{ $datos['color'] }}"
-                                                         style="width: {{ $porcentaje }}%"></div>
-                                                </div>
-                                                <small class="text-muted">{{ $porcentaje }}% del total</small>
+                                @php
+                                    $tipoNombre = $tiposNombres[$tipoComercio->tipo_form_comercio] ?? $tipoComercio->tipo_form_comercio;
+                                    $color = $tipoComercio->tipo_form_comercio === 'I' ? 'primary' : 'info';
+                                    $icono = $tipoComercio->tipo_form_comercio === 'I' ? 'house-door' : 'globe';
+                                    $porcentaje = $total > 0 ? round(($tipoComercio->total / $total) * 100, 1) : 0;
+                                @endphp
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-{{ $color }}">
+                                        <div class="card-body text-center py-4">
+                                            <div class="mb-2">
+                                                <i class="bi bi-{{ $icono }} fs-1 text-{{ $color }}"></i>
                                             </div>
+                                            <h2 class="text-{{ $color }}">{{ $tipoComercio->total }}</h2>
+                                            <h5 class="text-muted">Comercio {{ $tipoNombre }}</h5>
+                                            <div class="progress" style="height: 15px;">
+                                                <div class="progress-bar bg-{{ $color }}"
+                                                     style="width: {{ $porcentaje }}%"></div>
+                                            </div>
+                                            <small class="text-muted">{{ $porcentaje }}% del total</small>
                                         </div>
                                     </div>
-                                @endif
+                                </div>
                             @endforeach
                         </div>
                     </div>
@@ -151,7 +156,7 @@
         @endif
 
         <!-- Tabla de distribución por día -->
-        @if($datosPorDia->count() > 0)
+        @if($porDia->count() > 0)
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -172,7 +177,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($datosPorDia as $dia)
+                                    @foreach($porDia as $dia)
                                     @php
                                         $porcentaje = $total > 0 ? round(($dia->total / $total) * 100, 1) : 0;
                                         $fechaFormateada = \Carbon\Carbon::parse($dia->fecha)->format('d/m/Y');
@@ -216,15 +221,15 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('estadisticas.index') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i>Volver al Dashboard
+                        <i class="bi bi-arrow-left me-1"></i>Nueva Consulta
                     </a>
                     <div>
-                        <button class="btn btn-outline-primary" onclick="window.print()">
+                        <a href="{{ route('dashboard.index') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-speedometer2 me-1"></i>Volver al Dashboard
+                        </a>
+                        <button class="btn btn-primary ms-2" onclick="window.print()">
                             <i class="bi bi-printer me-1"></i>Imprimir Reporte
                         </button>
-                        <a href="{{ route('estadisticas.index') }}?reload=true" class="btn btn-primary ms-2">
-                            <i class="bi bi-arrow-repeat me-1"></i>Nueva Consulta
-                        </a>
                     </div>
                 </div>
             </div>

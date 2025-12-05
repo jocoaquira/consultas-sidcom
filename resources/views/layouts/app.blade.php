@@ -127,6 +127,12 @@
                 <div class="collapse navbar-collapse" id="navbarMain">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('dashboard.index') ? 'active bg-primary' : '' }}"
+                            href="{{ route('dashboard.index') }}">
+                                <i class="bi bi-speedometer2 me-1"></i> Inicio
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('operadores.index') ? 'active bg-primary' : '' }}"
                                href="{{ route('operadores.index') }}">
                                 <i class="bi bi-people-fill me-1"></i> Operadores Mineros
@@ -141,13 +147,14 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('actualizacion-operadors.*') ? 'active bg-primary' : '' }}"
                                href="{{ route('actualizacion-operadors.index') }}">
-                                <i class="bi bi-list-check me-1"></i> Actualizaciones
+                                <i class="bi bi-list-check me-1"></i> Actualizaciones de Operadores
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('actualizacion-operadors.create') ? 'active bg-primary' : '' }}"
-                               href="{{ route('actualizacion-operadors.create') }}">
-                                <i class="bi bi-plus-circle me-1"></i> Nueva Actualización
+                            <a class="nav-link {{ request()->routeIs('bloqueo-operadors.*') ? 'active bg-primary' : '' }}"
+                            href="{{ route('bloqueo-operadors.index') }}">
+                                <i class="bi bi-shield-lock me-1"></i> Bloqueo Operadores
                             </a>
                         </li>
                         <!-- Puedes agregar más enlaces aquí -->
@@ -220,7 +227,7 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Auto-ocultar alertas después de 5 segundos
         setTimeout(function() {
