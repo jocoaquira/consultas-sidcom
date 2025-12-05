@@ -65,9 +65,12 @@ class ActualizacionOperadorController extends Controller
             'RUEX' => 'RUEX',
             'NIM' => 'NIM',
             'CARTA_PODER' => 'Carta de Poder',
-            'IDENTIFICACION' => 'Identificación',
+            'IDOM' => 'IDOM',
             'NIT' => 'NIT',
-            'FUNDEMPRE' => 'Fundempre',
+            'REPRESENTANTE_LEGAL' => 'Representante Legal',
+            'DIRECCION' => 'Dirección',
+            'CONTRATO_DE_ARRENDAMIENTO' => 'Contrato de Arrendamiento',
+            'ARCHIVO_OBRADOS'=> 'Archivo de Obrados',
             'OTROS' => 'Otros',
         ];
 
@@ -79,7 +82,7 @@ class ActualizacionOperadorController extends Controller
         $validated = $request->validate([
             'operador_minero_id' => 'required|exists:operador_minero,id_operador_minero',
             'tipos' => 'required|array|min:1',
-            'tipos.*' => 'in:SEPREC,RUEX,NIM,CARTA_PODER,IDENTIFICACION,NIT,FUNDEMPRE,OTROS',
+            'tipos.*' => 'in:SEPREC,RUEX,NIM,CARTA_PODER,IDOM,NIT,REPRESENTANTE_LEGAL,DIRECCION,CONTRATO_DE_ARRENDAMIENTO,ARCHIVO_OBRADOS,OTROS',
             'fecha' => 'required|date',
             'observaciones' => 'nullable|string|max:500',
         ]);
@@ -144,9 +147,12 @@ class ActualizacionOperadorController extends Controller
             'RUEX' => 'RUEX',
             'NIM' => 'NIM',
             'CARTA_PODER' => 'Carta de Poder',
-            'IDENTIFICACION' => 'Identificación',
+            'IDOM' => 'IDOM',
             'NIT' => 'NIT',
-            'FUNDEMPRE' => 'Fundempre',
+            'REPRESENTANTE_LEGAL' => 'Representante Legal',
+            'DIRECCION' => 'Dirección',
+            'CONTRATO_DE_ARRENDAMIENTO' => 'Contrato de Arrendamiento',
+            'ARCHIVO_OBRADOS'=> 'Archivo de Obrados',
             'OTROS' => 'Otros',
         ];
 
@@ -162,7 +168,7 @@ class ActualizacionOperadorController extends Controller
         $validated = $request->validate([
             'operador_minero_id' => 'required|exists:operador_minero,id_operador_minero',
             'tipos' => 'required|array|min:1',
-            'tipos.*' => 'in:SEPREC,RUEX,NIM,CARTA_PODER,IDENTIFICACION,NIT,FUNDEMPRE,OTROS',
+            'tipos.*' => 'in:SEPREC,RUEX,NIM,CARTA_PODER,IDOM,NIT,REPRESENTANTE_LEGAL,DIRECCION,CONTRATO_DE_ARRENDAMIENTO,ARCHIVO_OBRADOS,OTROS',
             'fecha' => 'required|date',
             'observaciones' => 'nullable|string|max:500',
         ]);

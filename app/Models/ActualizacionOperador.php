@@ -148,9 +148,11 @@ class ActualizacionOperador extends Model
             'RUEX' => 'RUEX',
             'NIM' => 'NIM',
             'CARTA_PODER' => 'Carta de Poder',
-            'IDENTIFICACION' => 'Identificación',
+            'IDOM' => 'IDOM',
             'NIT' => 'NIT',
-            'FUNDEMPRE' => 'Fundempre',
+            'REPRESENTANTE_LEGAL' => 'Representante Legal',
+            'DIRECCION' => 'Dirección',
+            'CONTRATO_DE_ARRENDAMIENTO' => 'Contrato de Arrendamiento',
             'OTROS' => 'Otros',
         ];
     }
@@ -167,7 +169,9 @@ class ActualizacionOperador extends Model
             'CARTA_PODER' => 'warning',
             'IDENTIFICACION' => 'secondary',
             'NIT' => 'dark',
-            'FUNDEMPRE' => 'danger',
+            'REPRESENTANTE_LEGAL' => 'warning',
+            'DIRECCION' => 'secondary',
+            'CONTRATO_DE_ARRENDAMIENTO' => 'dark',
             'OTROS' => 'light',
         ];
     }
