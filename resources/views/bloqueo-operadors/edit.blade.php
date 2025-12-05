@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Nuevo Bloqueo/Desbloqueo de Operador')
+@section('title', 'Editar Bloqueo/Desbloqueo de Operador')
 
 @section('content')
 <div class="container-fluid">
@@ -10,7 +10,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center"
                      style="background: linear-gradient(135deg, #8B0000 0%, #6A0C0C 100%);">
                     <h4 class="mb-0 text-white">
-                        <i class="bi bi-plus-circle me-2"></i>Nuevo Registro de Bloqueo/Desbloqueo
+                        <i class="bi bi-pencil me-2"></i>Editar Registro de Bloqueo/Desbloqueo
                     </h4>
                     <a href="{{ route('bloqueo-operadors.index') }}"
                        class="btn btn-outline-light btn-sm">
@@ -18,8 +18,9 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('bloqueo-operadors.store') }}" method="POST" id="formBloqueo">
+                    <form action="{{ route('bloqueo-operadors.update', $bloqueo->id) }}" method="POST" id="formBloqueo">
                         @csrf
+                        @method('PUT')
 
                         <div class="row g-3">
                             <!-- Operador Minero - CON SELECT Y BÚSQUEDA -->
@@ -51,25 +52,23 @@
                                     @foreach($operadores as $operador)
                                     <option value="{{ $operador->id_operador_minero }}"
                                             data-search="{{ strtolower($operador->razon_social) }}"
-                                            {{ old('operador_minero_id') == $operador->id_operador_minero ? 'selected' : '' }}>
+                                            {{ $bloqueo->operador_minero_id == $operador->id_operador_minero ? 'selected' : '' }}>
                                         {{ $operador->razon_social }}
                                     </option>
                                     @endforeach
                                 </select>
 
                                 <!-- Mostrar operador seleccionado -->
-                                <div id="selectedOperador" class="mt-2 {{ old('operador_minero_id') ? '' : 'd-none' }}">
+                                <div id="selectedOperador" class="mt-2 {{ $bloqueo->operador_minero_id ? '' : 'd-none' }}">
                                     <div class="alert alert-success py-2 mb-0">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span>
                                                 <i class="bi bi-check-circle-fill me-2"></i>
                                                 <strong id="selectedOperadorText">
-                                                    @if(old('operador_minero_id'))
-                                                        @php
-                                                            $oldOperador = $operadores->firstWhere('id_operador_minero', old('operador_minero_id'));
-                                                        @endphp
-                                                        {{ $oldOperador->razon_social ?? '' }}
-                                                    @endif
+                                                    @php
+                                                        $currentOperador = $operadores->firstWhere('id_operador_minero', $bloqueo->operador_minero_id);
+                                                    @endphp
+                                                    {{ $currentOperador->razon_social ?? '' }}
                                                 </strong>
                                             </span>
                                             <button type="button" class="btn btn-sm btn-outline-danger"
@@ -88,7 +87,6 @@
                                 </div>
                             </div>
 
-                            <!-- Resto del formulario se mantiene igual -->
                             <!-- Estado -->
                             <div class="col-md-6">
                                 <label for="estado" class="form-label fw-medium" style="color: #8B0000;">
@@ -97,10 +95,10 @@
                                 <select class="form-select @error('estado') is-invalid @enderror"
                                         name="estado" id="estado" required>
                                     <option value="">Seleccionar acción...</option>
-                                    <option value="activo" {{ old('estado') == 'activo' ? 'selected' : '' }}>
+                                    <option value="activo" {{ $bloqueo->estado == 'activo' ? 'selected' : '' }}>
                                         <i class="bi bi-unlock-fill me-1 text-success"></i> Activar / Desbloquear
                                     </option>
-                                    <option value="bloqueado" {{ old('estado') == 'bloqueado' ? 'selected' : '' }}>
+                                    <option value="bloqueado" {{ $bloqueo->estado == 'bloqueado' ? 'selected' : '' }}>
                                         <i class="bi bi-lock-fill me-1 text-danger"></i> Bloquear
                                     </option>
                                 </select>
@@ -116,7 +114,7 @@
                                 </label>
                                 <input type="date" class="form-control @error('fecha') is-invalid @enderror"
                                        name="fecha" id="fecha"
-                                       value="{{ old('fecha', date('Y-m-d')) }}"
+                                       value="{{ old('fecha', $bloqueo->fecha) }}"
                                        required>
                                 @error('fecha')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -131,7 +129,7 @@
                                 <textarea class="form-control @error('motivo') is-invalid @enderror"
                                           name="motivo" id="motivo" rows="4"
                                           placeholder="Describa el motivo del bloqueo/desbloqueo..."
-                                          required>{{ old('motivo') }}</textarea>
+                                          required>{{ old('motivo', $bloqueo->motivo) }}</textarea>
                                 <div class="form-text text-muted">
                                     <i class="bi bi-info-circle me-1"></i> Mínimo 10 caracteres
                                 </div>
@@ -157,7 +155,7 @@
                                                    transition: all 0.3s ease;
                                                    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);">
                                         <i class="bi bi-save-fill me-2"></i>
-                                        <span>Guardar Registro</span>
+                                        <span>Actualizar Registro</span>
                                     </button>
                                 </div>
                             </div>
@@ -317,16 +315,6 @@ document.getElementById('formBloqueo').addEventListener('submit', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('fecha').setAttribute('max', today);
-
-    // Inicializar búsqueda si hay valor antiguo
-    const oldOperadorId = "{{ old('operador_minero_id') }}";
-    if (oldOperadorId) {
-        const select = document.getElementById('operador_minero_id');
-        const selectedOption = select.querySelector(`option[value="${oldOperadorId}"]`);
-        if (selectedOption) {
-            document.getElementById('selectedOperadorText').textContent = selectedOption.textContent;
-        }
-    }
 });
 </script>
 @endpush
