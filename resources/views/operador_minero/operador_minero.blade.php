@@ -8,272 +8,342 @@
         <div class="card-header d-flex justify-content-between align-items-center"
              style="background: linear-gradient(135deg, #8B0000 0%, #6A0C0C 100%);">
             <h5 class="mb-0 text-white">
-                <i class="fas fa-box me-2"></i>Operadores Mineros
+                <i class="fas fa-hard-hat me-2"></i>Operadores Mineros
             </h5>
             <div>
-                <span class="badge bg-light text-dark fs-6">{{ $productos->total() }} registros</span>
+                <span class="badge bg-light text-dark fs-6">
+                    Mostrando {{ $productos->count() }} de {{ $productos->total() }} registros
+                </span>
             </div>
         </div>
 
-        <!-- Filtros como en actualizaciones -->
+        <!-- TABS DE NAVEGACIÓN -->
+        <div class="card-body p-0">
+            <ul class="nav nav-tabs nav-fill border-bottom-0" id="operadoresTab" role="tablist" style="background: #495057;">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab', 'todos') == 'todos' ? 'active' : '' }}"
+                       href="?tab=todos&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-grid-3x3-gap me-1"></i>
+                        <span class="d-none d-lg-inline">Todos</span>
+                        <span class="badge ms-1">{{ $stats['todos'] }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab') == 'por_vencer' ? 'active' : '' }}"
+                       href="?tab=por_vencer&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-clock-fill me-1"></i>
+                        <span class="d-none d-xl-inline">Por Vencer</span>
+                        <span class="badge ms-1">{{ $stats['por_vencer'] }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab') == 'activos_vencidos' ? 'active' : '' }}"
+                       href="?tab=activos_vencidos&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <span class="d-none d-xl-inline">Activos</span>
+                        <span class="badge ms-1">{{ $stats['activos_vencidos'] }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab') == 'bloqueados_vencidos' ? 'active' : '' }}"
+                       href="?tab=bloqueados_vencidos&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-lock-fill me-1"></i>
+                        <span class="d-none d-xl-inline">Bloqueados</span>
+                        <span class="badge ms-1">{{ $stats['bloqueados_vencidos'] }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab') == 'nim_vencido' ? 'active' : '' }}"
+                       href="?tab=nim_vencido&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-file-earmark-x me-1"></i>
+                        <span class="d-none d-lg-inline">NIM</span>
+                        <span class="badge ms-1">{{ $stats['nim_vencido'] }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab') == 'seprec_vencido' ? 'active' : '' }}"
+                       href="?tab=seprec_vencido&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-file-earmark-x me-1"></i>
+                        <span class="d-none d-lg-inline">SEPREC</span>
+                        <span class="badge ms-1">{{ $stats['seprec_vencido'] }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab') == 'idom_vencido' ? 'active' : '' }}"
+                       href="?tab=idom_vencido&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-file-earmark-x me-1"></i>
+                        <span class="d-none d-lg-inline">IDOM</span>
+                        <span class="badge ms-1">{{ $stats['idom_vencido'] }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ request('tab') == 'todo_vencido' ? 'active' : '' }}"
+                       href="?tab=todo_vencido&{{ http_build_query(request()->except('tab', 'page')) }}">
+                        <i class="bi bi-x-octagon-fill me-1"></i>
+                        <span class="d-none d-xl-inline">Todo</span>
+                        <span class="badge ms-1">{{ $stats['todo_vencido'] }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- FILTROS MEJORADOS CON BÚSQUEDA GLOBAL -->
         <div class="card-body border-bottom p-3 bg-light">
-            <div class="row g-2">
-                <div class="col-md-3">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="bi bi-search text-muted"></i>
-                        </span>
-                        <input type="text"
-                               class="form-control border-start-0"
-                               id="globalSearch"
-                               placeholder="Buscar en todo...">
+            <form method="GET" action="{{ route('operadores.index') }}" id="formFiltros">
+                <input type="hidden" name="tab" value="{{ request('tab', 'todos') }}">
+
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text"
+                                   class="form-control border-start-0"
+                                   name="search"
+                                   value="{{ request('search') }}"
+                                   placeholder="Buscar: Razón social, representante, NIT, CI, email, observaciones...">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" name="tipo">
+                            <option value="">Todos los tipos</option>
+                            @php
+                                $tipos = [
+                                    1 => 'COOPERATIVA',
+                                    2 => 'ESTATAL',
+                                    3 => 'PRIVADA'
+                                ];
+                            @endphp
+                            @foreach($tipos as $key => $value)
+                            <option value="{{ $key }}" {{ request('tipo') == $key ? 'selected' : '' }}>
+                                {{ $value }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" name="estado">
+                            <option value="">Todos los estados</option>
+                            <option value="activo" {{ request('estado') == 'activo' ? 'selected' : '' }}>Activo</option>
+                            <option value="inactivo" {{ request('estado') == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" name="sort">
+                            <option value="prioridad" {{ request('sort', 'prioridad') == 'prioridad' ? 'selected' : '' }}>
+                                Ordenar por Prioridad
+                            </option>
+                            <option value="razon_social" {{ request('sort') == 'razon_social' ? 'selected' : '' }}>
+                                Razón Social
+                            </option>
+                            <option value="fecha_expiracion" {{ request('sort') == 'fecha_expiracion' ? 'selected' : '' }}>
+                                Fecha Exp. IDOM
+                            </option>
+                            <option value="fecha_exp_nim" {{ request('sort') == 'fecha_exp_nim' ? 'selected' : '' }}>
+                                Fecha Exp. NIM
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex gap-1">
+                            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+                                <i class="bi bi-funnel me-1"></i> Filtrar
+                            </button>
+                            <a href="{{ route('operadores.index') }}?tab={{ request('tab', 'todos') }}"
+                               class="btn btn-sm btn-outline-secondary"
+                               title="Limpiar filtros">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select form-select-sm" id="filterTipoOperador">
-                        <option value="">Todos los tipos</option>
-                        @php
-                            $tipos = [
-                                1 => 'COOPERATIVA',
-                                2 => 'ESTATAL',
-                                3 => 'PRIVADA'
-                            ];
-                        @endphp
-                        @foreach($tipos as $key => $value)
-                        <option value="{{ $key }}">{{ $value }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select form-select-sm" id="filterEstado">
-                        <option value="">Todos los estados</option>
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" class="form-control form-control-sm" id="filterObservaciones"
-                           placeholder="Buscar en observaciones...">
-                </div>
-                <div class="col-md-2">
-                    <div class="d-flex gap-1">
-                        <button class="btn btn-sm btn-primary flex-grow-1" id="btnAplicarFiltros">
-                            <i class="bi bi-funnel me-1"></i> Filtrar
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" id="btnLimpiarFiltros" title="Limpiar todo">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
 
         <div class="card-body p-0">
             @if($productos->isEmpty())
                 <div class="text-center py-5">
                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted mb-2">No hay operadores registrados</h5>
+                    <h5 class="text-muted mb-2">No hay operadores en esta categoría</h5>
+                    <p class="text-muted">Intenta cambiar los filtros o seleccionar otra pestaña</p>
                 </div>
             @else
                 {{-- Tabla con scroll --}}
-                <div class="table-container" style="max-height: calc(100vh - 280px); overflow: auto;">
+                <div class="table-container" style="max-height: calc(100vh - 380px); overflow: auto;">
                     <table class="table table-bordered table-striped table-hover mb-0" id="operadoresTable">
                         <thead class="table-dark sticky-top" style="top: 0;">
                             <tr>
-                                <th class="text-nowrap p-2">ID</th>
-                                <th class="text-nowrap p-2">RAZÓN SOCIAL</th>
-                                <th class="text-nowrap p-2">REPRESENTANTE</th>
-                                <th class="text-nowrap p-2">TIPO</th>
-                                <th class="text-nowrap p-2">EMAIL</th>
-                                <th class="text-nowrap p-2">FECHA EXP NIM</th>
-                                <th class="text-nowrap p-2">FECHA EXP SEPREC</th>
-                                <th class="text-nowrap p-2">FECHA EXP IDOM</th>
-                                <th class="text-nowrap p-2">OBSERVACIONES</th>
-                                <th class="text-nowrap p-2">USUARIOS</th>
-                                <th class="text-nowrap p-2">ESTADO</th>
-                                <th class="text-nowrap p-2">NOTIFICAR</th>
-                                <th class="text-nowrap p-2">MENSAJES</th>
+                                <th class="text-nowrap p-1 small" style="width: 40px;">ID</th>
+                                <th class="text-nowrap p-1 small text-center" style="width: 45px;">
+                                    <i class="bi bi-flag-fill" title="Prioridad"></i>
+                                </th>
+                                <th class="text-nowrap p-1 small" style="width: 180px; max-width: 180px;">RAZÓN SOCIAL</th>
+                                <th class="text-nowrap p-1 small" style="width: 140px;">REPRESENT.</th>
+                                <th class="text-nowrap p-1 small text-center" style="width: 60px;">TIPO</th>
+                                <th class="text-nowrap p-1 small" style="width: 110px;">NIM</th>
+                                <th class="text-nowrap p-1 small" style="width: 110px;">SEPREC</th>
+                                <th class="text-nowrap p-1 small" style="width: 110px;">IDOM</th>
+                                <th class="text-nowrap p-1 small text-center" style="width: 45px;">
+                                    <i class="bi bi-people-fill" title="Usuarios"></i>
+                                </th>
+                                <th class="text-nowrap p-1 small text-center" style="width: 70px;">ESTADO</th>
+                                <th class="text-nowrap p-1 small text-center" style="width: 80px;">ACCIÓN</th>
                             </tr>
                         </thead>
                         <tbody id="tablaBody">
                             @foreach($productos as $producto)
-                            <tr class="fila-operador"
-                                data-tipo="{{ $producto->actor_minero }}"
-                                data-razon-social="{{ strtolower($producto->razon_social) }}"
-                                data-representante="{{ strtolower($producto->nombre_rep_legal) }}"
-                                data-observaciones="{{ strtolower($producto->observaciones ?? '') }}"
-                                data-estado="{{ $producto->usuario()->where('estado_usuario', '=', '1')->count() > 0 ? 'activo' : 'inactivo' }}">
-                                {{-- ID --}}
-                                <td class="text-center fw-bold p-2">{{ $producto->id_operador_minero }}</td>
+                            @php
+                                $tieneUsuariosActivos = $producto->usuario()->where('estado_usuario', '=', '1')->count() > 0;
+                                $diasNim = $producto->fecha_exp_nim ? round((strtotime($producto->fecha_exp_nim) - strtotime(now())) / 86400) : null;
+                                $diasSeprec = $producto->fecha_exp_funda ? round((strtotime($producto->fecha_exp_funda) - strtotime(now())) / 86400) : null;
+                                $diasIdom = $producto->fecha_expiracion ? round((strtotime($producto->fecha_expiracion) - strtotime(now())) / 86400) : null;
 
-                                {{-- RAZÓN SOCIAL --}}
-                                <td class="text-nowrap p-2">
-                                    <strong>{{ $producto->razon_social }}</strong>
+                                // Calcular nivel de prioridad
+                                $prioridad = 0;
+                                if ($tieneUsuariosActivos) $prioridad += 3;
+                                if ($diasIdom !== null && $diasIdom < 0) $prioridad += 5;
+                                if ($diasNim !== null && $diasNim < 0) $prioridad += 3;
+                                if ($diasSeprec !== null && $diasSeprec < 0 && $producto->actor_minero == 3) $prioridad += 2;
+                            @endphp
+                            <tr>
+                                {{-- ID --}}
+                                <td class="text-center fw-bold p-1 small">{{ $producto->id_operador_minero }}</td>
+
+                                {{-- INDICADOR DE PRIORIDAD --}}
+                                <td class="text-center p-1">
+                                    @if($prioridad >= 8)
+                                        <i class="bi bi-exclamation-triangle-fill text-danger fs-5" title="Prioridad Crítica"></i>
+                                    @elseif($prioridad >= 5)
+                                        <i class="bi bi-exclamation-circle-fill text-warning fs-5" title="Prioridad Alta"></i>
+                                    @elseif($prioridad >= 3)
+                                        <i class="bi bi-info-circle-fill text-info fs-5" title="Prioridad Media"></i>
+                                    @else
+                                        <i class="bi bi-check-circle-fill text-success fs-5" title="Sin problemas"></i>
+                                    @endif
+                                </td>
+
+                                {{-- RAZÓN SOCIAL - COMPACTA --}}
+                                <td class="p-1 small" style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                    title="{{ $producto->razon_social }}{{ $producto->nit ? ' - NIT: ' . $producto->nit : '' }}{{ $producto->email_op_min ? ' - ' . $producto->email_op_min : '' }}">
+                                    <strong>{{ Str::limit($producto->razon_social, 25) }}</strong>
                                     @if($producto->nit)
                                         <br>
-                                        <small class="text-muted">NIT: {{ $producto->nit }}</small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">{{ $producto->nit }}</small>
                                     @endif
                                 </td>
 
-                                {{-- REPRESENTANTE --}}
-                                <td class="text-nowrap p-2">
-                                    {{ $producto->nombre_rep_legal }}
+                                {{-- REPRESENTANTE - COMPACTO --}}
+                                <td class="p-1 small" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                    title="{{ $producto->nombre_rep_legal }}{{ $producto->ci_rep_legal ? ' - CI: ' . $producto->ci_rep_legal : '' }}">
+                                    {{ Str::limit($producto->nombre_rep_legal, 20) }}
                                     @if($producto->ci_rep_legal)
                                         <br>
-                                        <small class="text-muted">CI: {{ $producto->ci_rep_legal }}</small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">{{ $producto->ci_rep_legal }}</small>
                                     @endif
                                 </td>
 
-                                {{-- TIPO (COOPERATIVA=1, ESTATAL=2, PRIVADA=3) --}}
-                                <td class="text-center p-2">
+                                {{-- TIPO --}}
+                                <td class="text-center p-1">
                                     @php
                                         $tipos = [
-                                            1 => ['text' => 'COOPERATIVA', 'class' => 'bg-info'],
-                                            2 => ['text' => 'ESTATAL', 'class' => 'bg-warning'],
-                                            3 => ['text' => 'PRIVADA', 'class' => 'bg-success']
+                                            1 => ['text' => 'COOP', 'class' => 'bg-info'],
+                                            2 => ['text' => 'EST', 'class' => 'bg-warning'],
+                                            3 => ['text' => 'PRIV', 'class' => 'bg-success']
                                         ];
-                                        $tipo = $tipos[$producto->actor_minero] ?? ['text' => 'DESCONOCIDO', 'class' => 'bg-secondary'];
+                                        $tipo = $tipos[$producto->actor_minero] ?? ['text' => 'N/A', 'class' => 'bg-secondary'];
                                     @endphp
-                                    <span class="badge {{ $tipo['class'] }}">{{ $tipo['text'] }}</span>
-                                </td>
-
-                                {{-- EMAIL --}}
-                                <td class="text-nowrap p-2">
-                                    @if($producto->email_op_min)
-                                        <a href="mailto:{{ $producto->email_op_min }}"
-                                           class="text-decoration-none"
-                                           title="{{ $producto->email_op_min }}">
-                                            <i class="fas fa-envelope me-1"></i>
-                                            {{ $producto->email_op_min }}
-                                        </a>
-                                    @else
-                                        <span class="text-muted">Sin email</span>
-                                    @endif
+                                    <span class="badge {{ $tipo['class'] }} p-1" style="font-size: 0.7rem;">{{ $tipo['text'] }}</span>
                                 </td>
 
                                 {{-- FECHA EXP NIM --}}
-                                @php
-                                    $diasNim = $producto->fecha_exp_nim ?
-                                        round((strtotime($producto->fecha_exp_nim) - strtotime(now())) / 86400) :
-                                        null;
-                                @endphp
-                                <td class="text-center p-2 {{
+                                <td class="text-center p-1 small {{
                                     ($producto->fecha_exp_nim && $diasNim < 0) ? 'estado1' :
-                                    (($producto->fecha_exp_nim && $diasNim < 5) ? 'estado2' : '')
+                                    (($producto->fecha_exp_nim && $diasNim < 11) ? 'estado2' : '')
                                 }}">
                                     @if($producto->fecha_exp_nim)
-                                        {{ \Carbon\Carbon::parse($producto->fecha_exp_nim)->format('d/m/Y') }}
-                                        <br>
-                                        <small class="{{ ($diasNim < 0) ? 'text-white' : 'text-muted' }}">
+                                        <div style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($producto->fecha_exp_nim)->format('d/m/Y') }}</div>
+                                        <small style="font-size: 0.65rem;" class="{{ ($diasNim < 0) ? 'text-white' : 'text-muted' }}">
                                             @if($diasNim > 0)
-                                                {{ $diasNim }} días
+                                                {{ $diasNim }}d
                                             @elseif($diasNim == 0)
-                                                Hoy vence
+                                                Hoy
                                             @else
-                                                Vencido {{ abs($diasNim) }} días
+                                                -{{ abs($diasNim) }}d
                                             @endif
                                         </small>
                                     @else
-                                        <span class="text-muted">N/A</span>
+                                        <span class="text-muted small">N/A</span>
                                     @endif
                                 </td>
 
                                 {{-- FECHA EXP SEPREC --}}
-                                @php
-                                    $diasSeprec = $producto->fecha_exp_funda ?
-                                        round((strtotime($producto->fecha_exp_funda) - strtotime(now())) / 86400) :
-                                        null;
-                                @endphp
-                                <td class="text-center p-2 {{
+                                <td class="text-center p-1 small {{
                                     ($producto->fecha_exp_funda && $producto->actor_minero == 3 && $diasSeprec < 0) ? 'estado1' :
-                                    (($producto->fecha_exp_funda && $producto->actor_minero == 3 && $diasSeprec < 5) ? 'estado2' : '')
+                                    (($producto->fecha_exp_funda && $producto->actor_minero == 3 && $diasSeprec < 11) ? 'estado2' : '')
                                 }}">
                                     @if($producto->fecha_exp_funda && $producto->actor_minero == 3)
-                                        {{ \Carbon\Carbon::parse($producto->fecha_exp_funda)->format('d/m/Y') }}
-                                        <br>
-                                        <small class="{{ ($diasSeprec < 0) ? 'text-white' : 'text-muted' }}">
+                                        <div style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($producto->fecha_exp_funda)->format('d/m/Y') }}</div>
+                                        <small style="font-size: 0.65rem;" class="{{ ($diasSeprec < 0) ? 'text-white' : 'text-muted' }}">
                                             @if($diasSeprec > 0)
-                                                {{ $diasSeprec }} días
+                                                {{ $diasSeprec }}d
                                             @elseif($diasSeprec == 0)
-                                                Hoy vence
+                                                Hoy
                                             @else
-                                                Vencido {{ abs($diasSeprec) }} días
+                                                -{{ abs($diasSeprec) }}d
                                             @endif
                                         </small>
                                     @else
-                                        <span class="text-muted">N/A</span>
+                                        <span class="text-muted small">N/A</span>
                                     @endif
                                 </td>
 
                                 {{-- FECHA EXP IDOM --}}
-                                @php
-                                    $diasIdom = $producto->fecha_expiracion ?
-                                        round((strtotime($producto->fecha_expiracion) - strtotime(now())) / 86400) :
-                                        null;
-                                @endphp
-                                <td class="text-center p-2 {{
+                                <td class="text-center p-1 small {{
                                     ($producto->fecha_expiracion && $diasIdom < 0) ? 'estado1' :
-                                    (($producto->fecha_expiracion && $diasIdom < 5) ? 'estado2' : '')
+                                    (($producto->fecha_expiracion && $diasIdom < 11) ? 'estado2' : '')
                                 }}">
                                     @if($producto->fecha_expiracion)
-                                        {{ \Carbon\Carbon::parse($producto->fecha_expiracion)->format('d/m/Y') }}
-                                        <br>
-                                        <small class="{{ ($diasIdom < 0) ? 'text-white' : 'text-muted' }}">
+                                        <div style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($producto->fecha_expiracion)->format('d/m/Y') }}</div>
+                                        <small style="font-size: 0.65rem;" class="{{ ($diasIdom < 0) ? 'text-white' : 'text-muted' }}">
                                             @if($diasIdom > 0)
-                                                {{ $diasIdom }} días
+                                                {{ $diasIdom }}d
                                             @elseif($diasIdom == 0)
-                                                Hoy vence
+                                                Hoy
                                             @else
-                                                Vencido {{ abs($diasIdom) }} días
+                                                -{{ abs($diasIdom) }}d
                                             @endif
                                         </small>
                                     @else
-                                        <span class="text-muted">N/A</span>
-                                    @endif
-                                </td>
-
-                                {{-- OBSERVACIONES --}}
-                                <td class="p-2" style="min-width: 200px; max-width: 300px;">
-                                    @if($producto->observaciones)
-                                        <div class="observaciones-cell"
-                                             style="word-wrap: break-word; white-space: pre-line; max-height: 100px; overflow-y: auto;"
-                                             title="Haz scroll para ver todo el contenido">
-                                            {{ $producto->observaciones }}
-                                        </div>
-                                    @else
-                                        <span class="text-muted">Sin observaciones</span>
+                                        <span class="text-muted small">N/A</span>
                                     @endif
                                 </td>
 
                                 {{-- USUARIOS COUNT --}}
-                                <td class="text-center p-2">
-                                    <span class="badge bg-secondary fs-6">{{ $producto->usuario()->count() }}</span>
+                                <td class="text-center p-1">
+                                    <span class="badge bg-secondary p-1" style="font-size: 0.7rem;">{{ $producto->usuario()->count() }}</span>
                                 </td>
 
                                 {{-- ESTADO USUARIOS --}}
-                                <td class="text-center p-2">
-                                    @php
-                                        $usuariosActivos = $producto->usuario()->where('estado_usuario', '=', '1')->count();
-                                    @endphp
-                                    @if($usuariosActivos == 0)
-                                        <span class="badge bg-danger">Deshabilitado</span>
+                                <td class="text-center p-1">
+                                    @if($tieneUsuariosActivos)
+                                        <span class="badge bg-success p-1" style="font-size: 0.65rem;">Activo</span>
                                     @else
-                                        <span class="badge bg-success">Activo</span>
+                                        <span class="badge bg-danger p-1" style="font-size: 0.65rem;">Bloq.</span>
                                     @endif
                                 </td>
 
                                 {{-- NOTIFICACIÓN --}}
-                                <td class="text-center p-2">
+                                <td class="text-center p-1">
                                     <button type="button"
-                                            class="btn btn-warning btn-sm d-flex align-items-center btn-notificar"
+                                            class="btn btn-warning btn-sm btn-notificar"
                                             data-operador="{{ $producto->razon_social }}"
                                             data-id="{{ $producto->id_operador_minero }}"
+                                            style="padding: 4px 8px !important; font-size: 0.75rem;"
                                             title="Enviar notificación">
-                                        <i class="fas fa-paper-plane me-1"></i>
-                                        <span class="d-none d-md-inline">Notificar</span>
+                                        <i class="fas fa-paper-plane"></i> Notificar
                                     </button>
 
-                                    <!-- Formulario hidden para notificación -->
                                     <form action="{{ route('operadores.notificar', $producto->id_operador_minero) }}"
                                           method="POST" class="d-inline form-notificar"
                                           id="formNotificar{{ $producto->id_operador_minero }}">
@@ -281,69 +351,28 @@
                                         @method('DELETE')
                                     </form>
                                 </td>
-
-                                {{-- EMAIL COUNT --}}
-                                <td class="text-center p-2">
-                                    <span class="badge bg-info fs-6">{{ $producto->email()->count() }}</span>
-                                </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
 
-                {{-- PAGINACIÓN MEJORADA --}}
+                {{-- PAGINACIÓN --}}
                 @if($productos->hasPages())
                 <div class="pagination-container p-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="text-muted">
                             Mostrando {{ $productos->firstItem() }} - {{ $productos->lastItem() }} de {{ $productos->total() }} registros
+                            <small class="text-info ms-2">(Página {{ $productos->currentPage() }} de {{ $productos->lastPage() }})</small>
                         </div>
                         <div>
-                            <nav aria-label="Paginación">
-                                <ul class="pagination pagination-sm mb-0">
-                                    {{-- Botón Anterior --}}
-                                    @if($productos->onFirstPage())
-                                        <li class="page-item disabled">
-                                            <span class="page-link">« Anterior</span>
-                                        </li>
-                                    @else
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $productos->previousPageUrl() }}" rel="prev">
-                                                « Anterior
-                                            </a>
-                                        </li>
-                                    @endif
-
-                                    {{-- Números de página --}}
-                                    @foreach($productos->getUrlRange(1, $productos->lastPage()) as $page => $url)
-                                        @if($page == $productos->currentPage())
-                                            <li class="page-item active">
-                                                <span class="page-link">{{ $page }}</span>
-                                            </li>
-                                        @else
-                                            <li class="page-item">
-                                                <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-                                            </li>
-                                        @endif
-                                    @endforeach
-
-                                    {{-- Botón Siguiente --}}
-                                    @if($productos->hasMorePages())
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $productos->nextPageUrl() }}" rel="next">
-                                                Siguiente »
-                                            </a>
-                                        </li>
-                                    @else
-                                        <li class="page-item disabled">
-                                            <span class="page-link">Siguiente »</span>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </nav>
+                            {{ $productos->appends(request()->query())->links('pagination::bootstrap-4') }}
                         </div>
                     </div>
+                </div>
+                @else
+                <div class="p-3 border-top text-muted text-center">
+                    Total: {{ $productos->total() }} registro(s) - Página {{ $productos->currentPage() }}
                 </div>
                 @endif
             @endif
@@ -392,6 +421,52 @@
 </div>
 
 <style>
+/* Tabs personalizados - MEJORADOS CON FONDO OSCURO */
+.nav-tabs {
+    background-color: #495057 !important;
+    padding: 5px 5px 0 5px;
+}
+
+.nav-tabs .nav-link {
+    color: #f8f9fa !important;
+    background-color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    margin: 0 3px;
+    border-radius: 6px 6px 0 0;
+    font-weight: 500;
+    padding: 8px 12px;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom: 3px solid #FFD700;
+    background-color: #5a6268;
+    color: #ffffff !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #fff;
+    border-bottom: 3px solid #8B0000;
+    color: #8B0000 !important;
+    font-weight: 600;
+}
+
+.nav-tabs .nav-link .badge {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-weight: 600;
+}
+
+.nav-tabs .nav-link.active .badge {
+    background-color: #8B0000;
+    color: white;
+}
+
+.nav-tabs .nav-link i {
+    font-size: 1rem;
+}
+
 /* Colores de alerta */
 .estado1 {
     background-color: #961007 !important;
@@ -402,55 +477,63 @@
     background-color: #f4f48a !important;
     font-weight: bold;
 }
-.estado1 small {
-    color: #ffffff !important;
-    opacity: 0.9;
-}
 
-/* Tabla responsiva */
+/* Tabla compacta */
 .table-container {
     overflow-x: auto;
     overflow-y: auto;
 }
+
+.table {
+    font-size: 0.85rem;
+}
+
 .table thead th {
     position: sticky;
     top: 0;
     background-color: #343a40;
     z-index: 10;
+    padding: 0.5rem 0.25rem !important;
 }
+
 .table tbody tr:hover {
-    background-color: rgba(0,0,0,.02);
+    background-color: rgba(139, 0, 0, 0.05);
 }
 
-/* Observaciones con scroll */
-.observaciones-cell {
-    max-height: 100px;
-    overflow-y: auto;
-    word-wrap: break-word;
-    white-space: pre-line;
-    padding: 5px;
-    border-radius: 4px;
-    background-color: #f8f9fa;
-    font-size: 0.9em;
+.table td {
+    vertical-align: middle;
 }
 
-/* Badges personalizados */
+/* Íconos de prioridad */
+.bi-exclamation-triangle-fill { color: #dc3545 !important; }
+.bi-exclamation-circle-fill { color: #ffc107 !important; }
+.bi-info-circle-fill { color: #0dcaf0 !important; }
+.bi-check-circle-fill { color: #198754 !important; }
+
+/* Badges compactos */
 .badge {
-    font-size: 0.85em;
-    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    padding: 0.25em 0.5em;
 }
 
-/* Botón notificar */
+/* Botón notificar mejorado */
 .btn-warning {
-    background: linear-gradient(to right, #FFD700, #FFA500);
-    color: #8B0000;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #6c2300 !important;
     border: none;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .btn-warning:hover {
-    background: linear-gradient(to right, #FFED4E, #FFB347);
-    color: #8B0000;
+    background: linear-gradient(135deg, #FFED4E 0%, #FFB347 100%);
+    color: #6c2300 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-warning:active {
+    transform: translateY(0);
 }
 
 /* Paginación */
@@ -466,128 +549,36 @@
     background-color: #f8f9fa;
 }
 
-/* Header del card */
-.card-header .badge {
-    font-size: 0.9em;
+/* Tooltip para textos truncados */
+[title] {
+    cursor: help;
 }
 </style>
 
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Inicializar tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Filtros en tiempo real que funcionan en todas las páginas
-    function aplicarFiltros() {
-        const busquedaGlobal = $('#globalSearch').val().toLowerCase();
-        const tipoOperador = $('#filterTipoOperador').val();
-        const estado = $('#filterEstado').val();
-        const observaciones = $('#filterObservaciones').val().toLowerCase();
-
-        let resultadosVisibles = 0;
-
-        $('#tablaBody tr').each(function() {
-            const row = $(this);
-            const razonSocial = row.data('razon-social');
-            const representante = row.data('representante');
-            const tipo = row.data('tipo');
-            const obs = row.data('observaciones');
-            const rowEstado = row.data('estado');
-
-            let mostrar = true;
-
-            // Filtro global (busca en razón social y representante)
-            if (busquedaGlobal) {
-                if (!razonSocial.includes(busquedaGlobal) && !representante.includes(busquedaGlobal)) {
-                    mostrar = false;
-                }
-            }
-
-            // Filtro por tipo de operador
-            if (tipoOperador && tipo.toString() !== tipoOperador) {
-                mostrar = false;
-            }
-
-            // Filtro por estado
-            if (estado && rowEstado !== estado) {
-                mostrar = false;
-            }
-
-            // Filtro por observaciones
-            if (observaciones && !obs.includes(observaciones)) {
-                mostrar = false;
-            }
-
-            if (mostrar) {
-                row.show();
-                resultadosVisibles++;
-            } else {
-                row.hide();
-            }
-        });
-
-        // Actualizar contador de resultados visibles
-        $('#contadorResultados').text(resultadosVisibles + ' de ' + {{ $productos->total() }});
-    }
-
-    // Eventos para filtros
-    $('#globalSearch, #filterObservaciones').on('keyup', function() {
-        aplicarFiltros();
-    });
-
-    $('#filterTipoOperador, #filterEstado').on('change', function() {
-        aplicarFiltros();
-    });
-
-    // Aplicar filtros al cargar (si hay filtros guardados)
-    aplicarFiltros();
-
-    // Limpiar filtros
-    $('#btnLimpiarFiltros').click(function() {
-        $('#globalSearch').val('');
-        $('#filterTipoOperador').val('');
-        $('#filterEstado').val('');
-        $('#filterObservaciones').val('');
-        aplicarFiltros();
-    });
-
-    // Aplicar filtros con botón
-    $('#btnAplicarFiltros').click(function() {
-        aplicarFiltros();
-    });
-
-    // Notificación con modal de confirmación
+    // Notificación con modal
     $(document).on('click', '.btn-notificar', function(e) {
         e.preventDefault();
 
         const operador = $(this).data('operador');
         const id = $(this).data('id');
 
-        // Configurar modal
         $('#modalTituloNotificacion').text(`¿Enviar notificación a ${operador}?`);
 
-        // Configurar botón de confirmación
         $('#confirmarNotificacionBtn').off('click').on('click', function() {
             const btn = $(this);
             btn.html('<span class="spinner-border spinner-border-sm me-1"></span> Enviando...').prop('disabled', true);
-
-            // Enviar formulario
             $(`#formNotificar${id}`).submit();
         });
 
-        // Mostrar modal
         $('#modalConfirmarNotificacion').modal('show');
     });
 
-    // Scroll suave para observaciones largas
-    document.querySelectorAll('.observaciones-cell').forEach(function(cell) {
-        if (cell.scrollHeight > 100) {
-            cell.title = "Haz scroll para ver todo el contenido";
-        }
+    // Auto-submit del formulario al cambiar ordenamiento
+    $('select[name="sort"]').on('change', function() {
+        $('#formFiltros').submit();
     });
 });
 </script>
