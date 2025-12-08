@@ -237,9 +237,10 @@
                                 <td class="p-1 small" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
                                     title="{{ $producto->nombre_rep_legal }}{{ $producto->ci_rep_legal ? ' - CI: ' . $producto->ci_rep_legal : '' }}">
                                     {{ Str::limit($producto->nombre_rep_legal, 20) }}
-                                    @if($producto->ci_rep_legal)
+                                    @if($producto->cel_op_min)
                                         <br>
-                                        <small class="text-muted" style="font-size: 0.7rem;">{{ $producto->ci_rep_legal }}</small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">{{ $producto->cel_op_min }}</small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">{{ $producto->cel_rep_legal }}</small>
                                     @endif
                                 </td>
 
