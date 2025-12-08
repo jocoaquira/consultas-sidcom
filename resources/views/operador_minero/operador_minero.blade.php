@@ -239,8 +239,8 @@
                                     {{ Str::limit($producto->nombre_rep_legal, 20) }}
                                     @if($producto->cel_op_min)
                                         <br>
-                                        <small class="text-muted" style="font-size: 0.7rem;">{{ $producto->cel_op_min }}</small>
-                                        <small class="text-muted" style="font-size: 0.7rem;">{{ $producto->cel_rep_legal }}</small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">Cel 1: {{ $producto->cel_op_min }}</small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">Cel 2: {{ $producto->cel_rep_legal }}</small>
                                     @endif
                                 </td>
 
