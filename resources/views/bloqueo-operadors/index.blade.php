@@ -168,16 +168,120 @@
                         </table>
                     </div>
 
-                    <!-- Paginación -->
-                    <div class="d-flex justify-content-center">
-                        {{ $bloqueos->links() }}
+                    <!-- PAGINACIÓN CORREGIDA -->
+                    @if($bloqueos->hasPages())
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            <small>
+                                <i class="bi bi-info-circle me-1"></i>
+                                Mostrando {{ $bloqueos->firstItem() ?? 0 }}-{{ $bloqueos->lastItem() ?? 0 }}
+                                de {{ $bloqueos->total() }} registros
+                            </small>
+                        </div>
+
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-sm mb-0">
+                                {{-- Enlace anterior --}}
+                                <li class="page-item {{ $bloqueos->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link"
+                                       href="{{ $bloqueos->previousPageUrl() }}"
+                                       aria-label="Anterior"
+                                       style="{{ !$bloqueos->onFirstPage() ? 'color: #8B0000;' : '' }}">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+
+                                {{-- Páginas numeradas --}}
+                                @php
+                                    $current = $bloqueos->currentPage();
+                                    $last = $bloqueos->lastPage();
+                                    $start = max(1, $current - 2);
+                                    $end = min($last, $current + 2);
+                                @endphp
+
+                                @if($start > 1)
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $bloqueos->url(1) }}" style="color: #8B0000;">
+                                            1
+                                        </a>
+                                    </li>
+                                    @if($start > 2)
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    @endif
+                                @endif
+
+                                @for ($page = $start; $page <= $end; $page++)
+                                    @if($page == $current)
+                                        <li class="page-item active">
+                                            <span class="page-link" style="background-color: #8B0000; border-color: #8B0000;">
+                                                {{ $page }}
+                                            </span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $bloqueos->url($page) }}" style="color: #8B0000;">
+                                                {{ $page }}
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endfor
+
+                                @if($end < $last)
+                                    @if($end < $last - 1)
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    @endif
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $bloqueos->url($last) }}" style="color: #8B0000;">
+                                            {{ $last }}
+                                        </a>
+                                    </li>
+                                @endif
+
+                                {{-- Enlace siguiente --}}
+                                <li class="page-item {{ !$bloqueos->hasMorePages() ? 'disabled' : '' }}">
+                                    <a class="page-link"
+                                       href="{{ $bloqueos->nextPageUrl() }}"
+                                       aria-label="Siguiente"
+                                       style="{{ $bloqueos->hasMorePages() ? 'color: #8B0000;' : '' }}">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted me-2">Ir a:</small>
+                            <div class="input-group input-group-sm" style="width: 80px;">
+                                <input type="number"
+                                       id="paginaInput"
+                                       class="form-control form-control-sm"
+                                       min="1"
+                                       max="{{ $bloqueos->lastPage() }}"
+                                       value="{{ $bloqueos->currentPage() }}"
+                                       style="border-color: #8B0000;">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" id="btnIrPagina">
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
+                    @else
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Total: {{ $bloqueos->total() }} registros
+                        </small>
+                    </div>
+                    @endif
                 </div>
                 <div class="card-footer text-muted" style="background-color: rgba(139, 0, 0, 0.03);">
                     <small>
-                        <i class="bi bi-info-circle me-1"></i>
-                        Total registros: {{ $bloqueos->total() }} |
-                        Mostrando: {{ $bloqueos->firstItem() ?? 0 }} - {{ $bloqueos->lastItem() ?? 0 }}
+                        <i class="bi bi-clock-history me-1"></i>
+                        Última actualización: {{ now()->format('d/m/Y H:i') }}
                     </small>
                 </div>
             </div>
@@ -214,7 +318,6 @@
                     <i class="bi bi-x-circle me-1"></i> Cerrar
                 </button>
             </div>
-        </div>
     </div>
 </div>
 @endsection
@@ -273,6 +376,31 @@
 
     #modalConfirmarEliminar .table-sm td {
         padding: 0.25rem 0;
+    }
+
+    /* Estilos para paginación */
+    .page-link {
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        background-color: rgba(139, 0, 0, 0.1);
+        color: #8B0000;
+        border-color: #8B0000;
+    }
+
+    .page-item.active .page-link {
+        background-color: #8B0000;
+        border-color: #8B0000;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
     }
 </style>
 @endpush
@@ -353,6 +481,26 @@ $(document).ready(function() {
     $('#filterFecha').on('dblclick', function() {
         $(this).val('');
         aplicarFiltros();
+    });
+
+    // Función para ir a página específica
+    $('#btnIrPagina').click(function() {
+        const pagina = $('#paginaInput').val();
+        const totalPaginas = {{ $bloqueos->lastPage() }};
+
+        if (pagina >= 1 && pagina <= totalPaginas) {
+            const baseUrl = window.location.href.split('?')[0];
+            const params = new URLSearchParams(window.location.search);
+            params.set('page', pagina);
+            window.location.href = baseUrl + '?' + params.toString();
+        }
+    });
+
+    // Permitir Enter en el input de página
+    $('#paginaInput').keypress(function(e) {
+        if (e.which === 13) {
+            $('#btnIrPagina').click();
+        }
     });
 
     // Modal de confirmación para eliminar

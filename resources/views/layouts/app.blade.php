@@ -3,13 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') - SIDCOM</title>
+
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <!-- En la sección <head> de layouts/app.blade.php, después de otros CSS -->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
     <style>
         /* Ocupa todo el espacio */
         html, body {
@@ -221,6 +233,162 @@
         .navbar-brand:hover i {
             text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
         }
+
+        /* Animación para alertas flotantes */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Alertas flotantes */
+        .alert-flotante {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        /* Botones de WhatsApp */
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white !important;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-whatsapp:hover {
+            background: linear-gradient(135deg, #2FE579 0%, #16A085 100%);
+            color: white !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Botones de Email */
+        .btn-email {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #6c2300 !important;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-email:hover {
+            background: linear-gradient(135deg, #FFED4E 0%, #FFB347 100%);
+            color: #6c2300 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Colores de estado para documentos vencidos */
+        .estado1 {
+            background-color: #961007 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+        }
+        .estado2 {
+            background-color: #f4f48a !important;
+            font-weight: bold;
+        }
+
+        /* Paginación */
+        .pagination .page-item.active .page-link {
+            background-color: #8B0000;
+            border-color: #8B0000;
+        }
+        .pagination .page-link {
+            color: #8B0000;
+        }
+        .pagination .page-link:hover {
+            color: #6A0C0C;
+            background-color: #f8f9fa;
+        }
+
+        /* Tabs personalizados */
+        .nav-tabs {
+            background-color: #495057 !important;
+            padding: 5px 5px 0 5px;
+        }
+
+        .nav-tabs .nav-link {
+            color: #f8f9fa !important;
+            background-color: #6c757d;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            margin: 0 3px;
+            border-radius: 6px 6px 0 0;
+            font-weight: 500;
+            padding: 8px 12px;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-bottom: 3px solid #FFD700;
+            background-color: #5a6268;
+            color: #ffffff !important;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #fff;
+            border-bottom: 3px solid #8B0000;
+            color: #8B0000 !important;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link .badge {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link.active .badge {
+            background-color: #8B0000;
+            color: white;
+        }
+
+        /* Tabla compacta */
+        .table-container {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #343a40;
+            z-index: 10;
+            padding: 0.5rem 0.25rem !important;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(139, 0, 0, 0.05);
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        /* Íconos de prioridad */
+        .bi-exclamation-triangle-fill { color: #dc3545 !important; }
+        .bi-exclamation-circle-fill { color: #ffc107 !important; }
+        .bi-info-circle-fill { color: #0dcaf0 !important; }
+        .bi-check-circle-fill { color: #198754 !important; }
+
+        /* Badges compactos */
+        .badge {
+            font-size: 0.75em;
+            padding: 0.25em 0.5em;
+        }
     </style>
 </head>
 <body>
@@ -303,6 +471,23 @@
                     </div>
                 </div>
             @endif
+
+            @if(session('email_enviado'))
+                <div class="alert alert-info alert-dismissible fade show mx-3 mt-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-envelope me-2 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong>Email enviado:</strong>
+                            @if(session('email_destino') != 'No tiene email')
+                                Notificación enviada a {{ session('email_destino') }}
+                            @else
+                                El operador no tiene email registrado
+                            @endif
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <!-- Contenido principal - 100% ancho -->
@@ -312,8 +497,7 @@
             </div>
         </main>
 
-        <!-- Acciones rápidas (opcional, se puede mostrar o no) -->
-
+        <!-- Acciones rápidas -->
         <section class="quick-actions">
             <div class="container-fluid">
                 <h5 class="mb-3" style="color: #8B0000;">
@@ -385,16 +569,24 @@
         </footer>
     </div>
 
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Al final del body de layouts/app.blade.php, antes de @stack('scripts') -->
+    <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
+
     <script>
+        // Variables globales
+        window.APP = {
+            baseUrl: "{{ url('') }}",
+            csrfToken: "{{ csrf_token() }}"
+        };
+
         // Auto-ocultar alertas después de 5 segundos
         setTimeout(function() {
             $('.alert').alert('close');
@@ -438,6 +630,33 @@
                 }
             );
         });
+
+        // Función para mostrar alertas flotantes (genérica)
+        function mostrarAlerta(mensaje, tipo) {
+            const alertId = 'alert-' + Date.now();
+            const icono = tipo === 'success' ? 'bi-check-circle' :
+                        tipo === 'warning' ? 'bi-exclamation-triangle' :
+                        tipo === 'info' ? 'bi-info-circle' : 'bi-x-circle';
+
+            const alerta = `
+                <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show alert-flotante" role="alert">
+                    <i class="bi ${icono} me-2"></i>
+                    ${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            // Agregar alerta al body
+            $('body').append(alerta);
+
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                const alertaElemento = document.getElementById(alertId);
+                if (alertaElemento) {
+                    $(alertaElemento).alert('close');
+                }
+            }, 5000);
+        }
     </script>
 
     @stack('scripts')

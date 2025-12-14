@@ -8,52 +8,77 @@ use App\Http\Controllers\BloqueosOperadorController;
 use App\Http\Controllers\OperadorMineroController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\TomaMuestraController;
+use Resend\Laravel\Facades\Resend;
 
-// RUTA PRINCIPAL ÚNICA - Dashboard
+// RUTA PRINCIPAL
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
-// Rutas de Operadores Mineros
-Route::delete('operadores/notificar/{id}', [OperadorMineroController::class, 'notificacion'])->name('operadores.notificar');
-Route::resource('operadores', OperadorMineroController::class);
+// ==================== RUTAS OPERADORES MINEROS ====================
+// LISTADO PRINCIPAL
+Route::get('/operadores', [OperadorMineroController::class, 'index'])->name('operadores.index');
 
-// Rutas de Usuarios
+// NOTIFICACIONES - RUTAS NUEVAS Y SIMPLES
+Route::post('/operadores/enviar-email/{id}', [OperadorMineroController::class, 'enviarEmail'])->name('operadores.enviarEmail');
+Route::get(
+    '/operadores/{id}/whatsapp-mensaje',
+    [OperadorMineroController::class, 'obtenerMensajeWhatsApp']
+)->name('operadores.whatsapp.mensaje');
+
+Route::post(
+    '/operadores/{id}/registrar-whatsapp',
+    [OperadorMineroController::class, 'registrarWhatsAppEnvio']
+)->name('operadores.whatsapp.registrar');
+
+// RUTAS ANTIGUAS (para compatibilidad)
+Route::delete('/operadores/notificar/{id}', [OperadorMineroController::class, 'notificacion'])->name('operadores.notificar');
+
+// OTRAS RUTAS CRUD
+Route::get('/operadores/create', [OperadorMineroController::class, 'create'])->name('operadores.create');
+Route::post('/operadores', [OperadorMineroController::class, 'store'])->name('operadores.store');
+Route::get('/operadores/{operador_minero}', [OperadorMineroController::class, 'show'])->name('operadores.show');
+Route::get('/operadores/{operador_minero}/edit', [OperadorMineroController::class, 'edit'])->name('operadores.edit');
+Route::put('/operadores/{operador_minero}', [OperadorMineroController::class, 'update'])->name('operadores.update');
+Route::delete('/operadores/{operador_minero}', [OperadorMineroController::class, 'destroy'])->name('operadores.destroy');
+// ==================== FIN RUTAS OPERADORES ====================
+
+// OTRAS RUTAS DEL SISTEMA
 Route::resource('usuarios', UsuarioController::class);
-
-// Rutas de Toma de Muestra
 Route::resource('toma-muestra', TomaMuestraController::class);
-
-// Rutas CRUD para ActualizacionOperador
 Route::resource('actualizacion-operadors', ActualizacionOperadorController::class);
+Route::resource('bloqueo-operadors', BloqueosOperadorController::class);
 
-// Ruta adicional para importar desde operador_minero
-Route::post('actualizacion-operadors/importar', [ActualizacionOperadorController::class, 'importarDesdeOperadores'])
-     ->name('actualizacion-operadors.importar');
+// RUTAS ADICIONALES
+Route::post('actualizacion-operadors/importar', [ActualizacionOperadorController::class, 'importarDesdeOperadores'])->name('actualizacion-operadors.importar');
+Route::get('actualizacion-operadors/por-operador/{operadorId}', [ActualizacionOperadorController::class, 'porOperador'])->name('actualizacion-operadors.por-operador');
+Route::get('bloqueo-operadors/historial/{operadorId}', [BloqueosOperadorController::class, 'historial'])->name('bloqueo-operadors.historial');
+Route::post('bloqueo-operadors/bloquear-rapido', [BloqueosOperadorController::class, 'bloquearRapido'])->name('bloqueo-operadors.bloquear-rapido');
+Route::post('bloqueo-operadors/desbloquear-rapido', [BloqueosOperadorController::class, 'desbloquearRapido'])->name('bloqueo-operadors.desbloquear-rapido');
 
-// Ruta para ver por operador específico
-Route::get('actualizacion-operadors/por-operador/{operadorId}', [ActualizacionOperadorController::class, 'porOperador'])
-     ->name('actualizacion-operadors.por-operador');
 
-// Rutas de estadísticas
+// Rutas para bloqueo de operadores
+Route::get('bloqueo-operadors/historial/{operadorId}', [BloqueosOperadorController::class, 'historial'])->name('bloqueo-operadors.historial');
+Route::post('bloqueo-operadors/bloquear-rapido', [BloqueosOperadorController::class, 'bloquearRapido'])->name('bloqueo-operadors.bloquear-rapido');
+Route::post('bloqueo-operadors/desbloquear-rapido', [BloqueosOperadorController::class, 'desbloquearRapido'])->name('bloqueo-operadors.desbloquear-rapido');
+
+
+
+// ESTADÍSTICAS
 Route::prefix('estadisticas')->group(function () {
     Route::get('/', [EstadisticasController::class, 'index'])->name('estadisticas.index');
     Route::post('/consulta', [EstadisticasController::class, 'consultaPersonalizada'])->name('estadisticas.consulta');
     Route::get('/semana', [EstadisticasController::class, 'consultaSemana'])->name('estadisticas.semana');
 });
 
-// Ruta alternativa si quieres también poder acceder a actualizaciones desde la raíz
-// Route::get('/actualizaciones', function () {
-//     return redirect()->route('actualizacion-operadors.index');
-// })->name('actualizaciones');
 
-// Rutas para bloqueo de operadores
-Route::resource('bloqueo-operadors', BloqueosOperadorController::class);
 
-// Rutas adicionales
-Route::get('bloqueo-operadors/historial/{operadorId}', [BloqueosOperadorController::class, 'historial'])
-    ->name('bloqueo-operadors.historial');
-
-Route::post('bloqueo-operadors/bloquear-rapido', [BloqueosOperadorController::class, 'bloquearRapido'])
-    ->name('bloqueo-operadors.bloquear-rapido');
-
-Route::post('bloqueo-operadors/desbloquear-rapido', [BloqueosOperadorController::class, 'desbloquearRapido'])
-    ->name('bloqueo-operadors.desbloquear-rapido');
+// RUTA DEBUG
+Route::get('/debug-operadores', function() {
+    return response()->json([
+        'rutas_operadores' => [
+            'GET /operadores' => 'Listado',
+            'POST /operadores/enviar-email/{id}' => 'Enviar email',
+            'GET /operadores/mensaje-whatsapp/{id}' => 'Obtener mensaje WhatsApp',
+            'POST /operadores/registrar-whatsapp/{id}' => 'Registrar WhatsApp'
+        ]
+    ]);
+});
