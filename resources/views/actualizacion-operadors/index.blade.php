@@ -209,10 +209,11 @@
                                 | Mostrando {{ $actualizaciones->firstItem() }}-{{ $actualizaciones->lastItem() }} de {{ $actualizaciones->total() }}
                             </div>
                             <div>
-                                {{ $actualizaciones->links('pagination::simple-bootstrap-5') }}
+                                {{ $actualizaciones->links() }}
                             </div>
                         </div>
                     </div>
+                    @endif
                     @endif
                 </div>
                 @if(!$actualizaciones->isEmpty())
