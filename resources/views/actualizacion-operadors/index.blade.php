@@ -200,119 +200,27 @@
                         </table>
                     </div>
 
-                    <!-- PAGINACIÓN MEJORADA -->
+                    <!-- PAGINACIÓN SIMPLE Y FUNCIONAL -->
                     @if($actualizaciones->hasPages())
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
-                        <div class="text-muted small">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Mostrando {{ $actualizaciones->firstItem() ?? 0 }}-{{ $actualizaciones->lastItem() ?? 0 }}
-                            de {{ $actualizaciones->total() }} registros
-                        </div>
-
-                        <nav aria-label="Paginación" class="d-flex justify-content-center">
-                            <ul class="pagination pagination-sm mb-0">
-                                {{-- Enlace anterior --}}
-                                <li class="page-item {{ $actualizaciones->onFirstPage() ? 'disabled' : '' }}">
-                                    <a class="page-link"
-                                       href="{{ $actualizaciones->previousPageUrl() }}"
-                                       aria-label="Anterior"
-                                       style="{{ !$actualizaciones->onFirstPage() ? 'color: #8B0000;' : '' }}">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-
-                                {{-- Páginas numeradas (mostrar solo 5 páginas) --}}
-                                @php
-                                    $current = $actualizaciones->currentPage();
-                                    $last = $actualizaciones->lastPage();
-                                    $start = max(1, $current - 2);
-                                    $end = min($last, $current + 2);
-                                @endphp
-
-                                @if($start > 1)
-                                    <li class="page-item">
-                                        <a class="page-link" href="{{ $actualizaciones->url(1) }}" style="color: #8B0000;">
-                                            1
-                                        </a>
-                                    </li>
-                                    @if($start > 2)
-                                        <li class="page-item disabled">
-                                            <span class="page-link">...</span>
-                                        </li>
-                                    @endif
-                                @endif
-
-                                @for ($page = $start; $page <= $end; $page++)
-                                    @if($page == $current)
-                                        <li class="page-item active">
-                                            <span class="page-link" style="background-color: #8B0000; border-color: #8B0000;">
-                                                {{ $page }}
-                                            </span>
-                                        </li>
-                                    @else
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $actualizaciones->url($page) }}" style="color: #8B0000;">
-                                                {{ $page }}
-                                            </a>
-                                        </li>
-                                    @endif
-                                @endfor
-
-                                @if($end < $last)
-                                    @if($end < $last - 1)
-                                        <li class="page-item disabled">
-                                            <span class="page-link">...</span>
-                                        </li>
-                                    @endif
-                                    <li class="page-item">
-                                        <a class="page-link" href="{{ $actualizaciones->url($last) }}" style="color: #8B0000;">
-                                            {{ $last }}
-                                        </a>
-                                    </li>
-                                @endif
-
-                                {{-- Enlace siguiente --}}
-                                <li class="page-item {{ !$actualizaciones->hasMorePages() ? 'disabled' : '' }}">
-                                    <a class="page-link"
-                                       href="{{ $actualizaciones->nextPageUrl() }}"
-                                       aria-label="Siguiente"
-                                       style="{{ $actualizaciones->hasMorePages() ? 'color: #8B0000;' : '' }}">
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-
-                        <div class="d-flex align-items-center gap-2">
-                            <small class="text-muted">Ir a:</small>
-                            <div class="input-group input-group-sm" style="width: 80px;">
-                                <input type="number"
-                                       id="paginaInput"
-                                       class="form-control form-control-sm"
-                                       min="1"
-                                       max="{{ $actualizaciones->lastPage() }}"
-                                       value="{{ $actualizaciones->currentPage() }}"
-                                       style="border-color: #8B0000;">
-                                <button class="btn btn-outline-secondary btn-sm" type="button" id="btnIrPagina">
-                                    <i class="bi bi-arrow-right"></i>
-                                </button>
+                    <div class="d-flex justify-content-center mt-4">
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="mb-2 text-muted small">
+                                Página {{ $actualizaciones->currentPage() }} de {{ $actualizaciones->lastPage() }}
+                                | Mostrando {{ $actualizaciones->firstItem() }}-{{ $actualizaciones->lastItem() }} de {{ $actualizaciones->total() }}
+                            </div>
+                            <div>
+                                {{ $actualizaciones->links('pagination::simple-bootstrap-5') }}
                             </div>
                         </div>
-                    </div>
-                    @else
-                    <div class="text-center mt-4">
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Total: {{ $actualizaciones->total() }} registro(s)
-                        </small>
                     </div>
                     @endif
                 </div>
                 @if(!$actualizaciones->isEmpty())
                 <div class="card-footer text-muted" style="background-color: rgba(139, 0, 0, 0.03);">
                     <small>
-                        <i class="bi bi-clock-history me-1"></i>
-                        Última actualización: {{ now()->format('d/m/Y H:i') }}
+                        <i class="bi bi-info-circle me-1"></i>
+                        Total registros: {{ $actualizaciones->total() }} |
+                        Mostrando: {{ $actualizaciones->firstItem() ?? 0 }} - {{ $actualizaciones->lastItem() ?? 0 }}
                     </small>
                 </div>
                 @endif
@@ -399,19 +307,9 @@
         padding: 0.35em 0.65em;
     }
 
-    /* ESTILOS PARA PAGINACIÓN */
-    .page-link {
-        border: 1px solid #dee2e6;
-        color: #6c757d;
-        transition: all 0.3s ease;
-        font-size: 0.875rem;
-        padding: 0.375rem 0.75rem;
-    }
-
-    .page-link:hover {
-        background-color: rgba(139, 0, 0, 0.1);
-        color: #8B0000;
-        border-color: #8B0000;
+    /* Estilos para paginación simple */
+    .pagination {
+        margin-bottom: 0;
     }
 
     .page-item.active .page-link {
@@ -419,35 +317,12 @@
         border-color: #8B0000;
     }
 
-    .page-item.disabled .page-link {
-        color: #6c757d;
-        pointer-events: none;
-        background-color: #f8f9fa;
-        border-color: #dee2e6;
-        opacity: 0.6;
+    .page-link {
+        color: #8B0000;
     }
 
-    /* Input para ir a página */
-    #paginaInput:focus {
-        border-color: #8B0000;
-        box-shadow: 0 0 0 0.2rem rgba(139, 0, 0, 0.15);
-    }
-
-    /* Responsive para paginación */
-    @media (max-width: 768px) {
-        .d-flex.justify-content-between.align-items-center {
-            flex-direction: column;
-            gap: 1rem !important;
-        }
-
-        .pagination {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .d-flex.align-items-center.gap-2 {
-            margin-top: 1rem;
-        }
+    .page-link:hover {
+        color: #6A0C0C;
     }
 </style>
 @endpush
@@ -548,28 +423,6 @@ $(document).ready(function() {
         if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
             alert('La fecha "Hasta" no puede ser anterior a la fecha "Desde"');
             $(this).val('');
-        }
-    });
-
-    // Función para ir a página específica
-    $('#btnIrPagina').click(function() {
-        const pagina = $('#paginaInput').val();
-        const totalPaginas = {{ $actualizaciones->lastPage() }};
-
-        if (pagina >= 1 && pagina <= totalPaginas) {
-            const baseUrl = window.location.href.split('?')[0];
-            const params = new URLSearchParams(window.location.search);
-            params.set('page', pagina);
-            window.location.href = baseUrl + '?' + params.toString();
-        } else {
-            alert(`Por favor, ingrese un número entre 1 y ${totalPaginas}`);
-        }
-    });
-
-    // Permitir Enter en el input de página
-    $('#paginaInput').keypress(function(e) {
-        if (e.which === 13) {
-            $('#btnIrPagina').click();
         }
     });
 
