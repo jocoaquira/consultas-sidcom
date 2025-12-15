@@ -493,7 +493,7 @@ function generarVistaPreviaMensaje() {
             mensaje += "- Representante: " + operadorSeleccionado.nombre + "\n\n";
             mensaje += "*CONTACTO:*\n";
             mensaje += "Email: mineria@oruro.gob.bo\n";
-            mensaje += "Telefonos: 61831994 - 72435656\n\n";
+            mensaje += "Telefonos: 61831994 - 64050564\n\n";
             mensaje += "_Mensaje automatico - GADOR_";
         } else {
             mensaje = "*GOBIERNO AUTONOMO DEPARTAMENTAL DE ORURO*\n";
@@ -508,7 +508,7 @@ function generarVistaPreviaMensaje() {
             mensaje += "- Representante: " + operadorSeleccionado.nombre + "\n\n";
             mensaje += "*CONTACTO:*\n";
             mensaje += "Email: mineria@oruro.gob.bo\n";
-            mensaje += "Telefonos: 61831994 - 72435656\n\n";
+            mensaje += "Telefonos: 61831994 - 64050564\n\n";
             mensaje += "_Mensaje automatico - GADOR_";
         }
 
