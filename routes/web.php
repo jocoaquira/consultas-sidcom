@@ -18,7 +18,7 @@ Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/operadores', [OperadorMineroController::class, 'index'])->name('operadores.index');
 
 // NOTIFICACIONES - RUTAS NUEVAS Y SIMPLES
-Route::post('/operadores/enviar-email/{id}', [OperadorMineroController::class, 'enviarEmail'])->name('operadores.enviarEmail');
+Route::post('/operadores/{id}/notificar-email', [OperadorMineroController::class, 'notificarEmail'])->name('operadores.notificarEmail');
 Route::get(
     '/operadores/{id}/whatsapp-mensaje',
     [OperadorMineroController::class, 'obtenerMensajeWhatsApp']
