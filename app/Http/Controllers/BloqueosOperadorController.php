@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Resend\Laravel\Facades\Resend;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class BloqueosOperadorController extends Controller
 {
@@ -173,19 +173,18 @@ class BloqueosOperadorController extends Controller
     {
         try {
             if (!$operador->email_op_min) {
-                Log::warning('Operador sin email para notificación de bloqueo: ' . $operador->razon_social);
+                Log::warning('Operador sin email para notificacion de bloqueo: ' . $operador->razon_social);
                 return false;
             }
 
             $htmlCorreo = $this->generarHTMLEmailBloqueo($operador, $motivo);
 
-            Resend::emails()->send([
-                'from' => 'Secretaría Departamental de Mineria, Metalurgia y Recursos Energéticos <onboarding@resend.dev>',
-                'to' => $operador->email_op_min,
-                //'to' => 'jocrock.cga@gmail.com',
-                'subject' => 'DESABILITACIÓN DE CUENTA SIDCOM',
-                'html' => $htmlCorreo
-            ]);
+            Mail::send([], [], function ($message) use ($operador, $htmlCorreo) {
+                $message->from(config('mail.from.address'), config('mail.from.name'))
+                    ->to($operador->email_op_min)
+                    ->subject('DESABILITACION DE CUENTA SIDCOM')
+                    ->html($htmlCorreo);
+            });
 
             Log::info('Email de bloqueo enviado a: ' . $operador->email_op_min);
             return true;
@@ -200,19 +199,18 @@ class BloqueosOperadorController extends Controller
     {
         try {
             if (!$operador->email_op_min) {
-                Log::warning('Operador sin email para notificación de desbloqueo: ' . $operador->razon_social);
+                Log::warning('Operador sin email para notificacion de desbloqueo: ' . $operador->razon_social);
                 return false;
             }
 
             $htmlCorreo = $this->generarHTMLEmailDesbloqueo($operador, $motivo);
 
-            Resend::emails()->send([
-                'from' => 'Secretaría Departamental de Mineria, Metalurgia y Recursos Energéticos <onboarding@resend.dev>',
-                'to' => $operador->email_op_min,
-                //'to' => 'jocrock.cga@gmail.com',
-                'subject' => 'HABILITACIÓN DE CUENTA SIDCOM',
-                'html' => $htmlCorreo
-            ]);
+            Mail::send([], [], function ($message) use ($operador, $htmlCorreo) {
+                $message->from(config('mail.from.address'), config('mail.from.name'))
+                    ->to($operador->email_op_min)
+                    ->subject('HABILITACION DE CUENTA SIDCOM')
+                    ->html($htmlCorreo);
+            });
 
             Log::info('Email de desbloqueo enviado a: ' . $operador->email_op_min);
             return true;

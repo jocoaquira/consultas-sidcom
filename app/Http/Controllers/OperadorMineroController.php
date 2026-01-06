@@ -8,7 +8,7 @@ use App\Http\Requests\Updateoperador_mineroRequest;
 use App\Models\Email;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Resend\Laravel\Facades\Resend;
+use Illuminate\Support\Facades\Mail;
 
 class OperadorMineroController extends Controller
 {
@@ -296,6 +296,14 @@ class OperadorMineroController extends Controller
             // Generar HTML del correo
             $htmlCorreo = $this->generarHTMLCorreo($operador, $mensajeVencimiento);
 
+            // Enviar correo con Gmail (Laravel Mail)
+            Mail::send([], [], function ($message) use ($operador, $htmlCorreo) {
+                $message->from(config('mail.from.address'), config('mail.from.name'))
+                    ->to($operador->email_op_min)
+                    ->subject('NOTIFICACION IMPORTANTE - DOCUMENTOS VENCIDOS')
+                    ->html($htmlCorreo);
+            });
+            /*
             // Enviar correo con Resend
             Resend::emails()->send([
                 'from' => 'Secretaría Departamental de Mineria, Metalurgia y Recursos Energéticos <onboarding@resend.dev>',
@@ -303,6 +311,7 @@ class OperadorMineroController extends Controller
                 'subject' => 'NOTIFICACIÓN IMPORTANTE - Documentos Vencidos',
                 'html' => $htmlCorreo
             ]);
+            */
 
             // Guardar registro en base de datos
             $email = new Email();
