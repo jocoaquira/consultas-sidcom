@@ -614,6 +614,9 @@ public function registrarWhatsAppEnvio(Request $request, $id)
         $accionCorreo = $esPorVencer
             ? 'Por favor, actualice sus documentos antes de la fecha de vencimiento para evitar inconvenientes.'
             : 'Por favor, actualice sus documentos a la brevedad posible para evitar inconvenientes en sus tramites.';
+        $detalleCorreo = $esPorVencer
+            ? $this->formatearListaHtml($mensajeVencimiento)
+            : "<span>{$mensajeVencimiento}</span>";
 
         return "
         <!DOCTYPE html>
@@ -651,10 +654,8 @@ public function registrarWhatsAppEnvio(Request $request, $id)
                                         {$descripcionCorreo}
                                     </p>
 
-                                    <div style='background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0; border-radius: 4px;'>
-                                        <p style='color: #991b1b; margin: 0; font-weight: bold; font-size: 15px;'>
-                                            {$mensajeVencimiento}
-                                        </p>
+                                    <div style='background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0; border-radius: 4px; color: #991b1b; font-weight: bold; font-size: 15px;'>
+                                        {$detalleCorreo}
                                     </div>
 
                                     <div style='background-color: #f9fafb; padding: 20px; border-radius: 6px; margin: 25px 0;'>
@@ -759,6 +760,22 @@ public function registrarWhatsAppEnvio(Request $request, $id)
         $mensaje .= "_Este es un mensaje automático del GADOR._";
 
         return $mensaje;
+    }
+
+    private function formatearListaHtml(string $mensaje): string
+    {
+        $items = array_filter(array_map('trim', explode('.', $mensaje)));
+        if (empty($items)) {
+            return $mensaje;
+        }
+
+        $lista = "<ul style='margin: 0; padding-left: 18px;'>";
+        foreach ($items as $item) {
+            $lista .= "<li>{$item}</li>";
+        }
+        $lista .= "</ul>";
+
+        return $lista;
     }
 
     /**
