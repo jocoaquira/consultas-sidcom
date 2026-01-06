@@ -208,6 +208,10 @@
 
                                 // Obtener celular como string
                                 $celular = (string)($producto->cel_op_min ?: $producto->cel_rep_legal);
+                                $tipoEmail = request('tab') == 'por_vencer' ? 'por_vencer' : 'vencidos';
+                                $tituloEmail = $tipoEmail === 'por_vencer'
+                                    ? 'Enviar alerta por vencer'
+                                    : 'Enviar notificacion por Email';
                             @endphp
                             <tr>
                                 {{-- ID --}}
@@ -347,7 +351,8 @@
                                                 data-id="{{ $producto->id_operador_minero }}"
                                                 data-operador="{{ $producto->razon_social }}"
                                                 data-email="{{ $producto->email_op_min }}"
-                                                title="Enviar notificación por Email"
+                                                data-tipo="{{ $tipoEmail }}"
+                                                title="{{ $tituloEmail }}"
                                                 style="min-width: 75px; font-size: 0.8rem;">
                                             <i class="fas fa-envelope me-1"></i>
                                             <span class="d-none d-md-inline">Email</span>
@@ -691,15 +696,20 @@ $(document).ready(function() {
         const id = $(this).data('id');
         const operador = $(this).data('operador');
         const email = $(this).data('email');
+        const tipo = $(this).data('tipo') || 'vencidos';
 
         console.log('Email clickeado:', { id, operador, email });
 
-        $('#emailOperador').text(`¿Enviar notificación a ${operador}?`);
+        const titulo = tipo === 'por_vencer'
+            ? `Enviar alerta por vencer a ${operador}?`
+            : `Enviar notificacion a ${operador}?`;
+
+        $('#emailOperador').text(titulo);
         $('#emailDestino').html(`<strong>Destino:</strong> ${email || '<span class="text-danger">No tiene email</span>'}`);
 
         // Configurar el botón de confirmación
         $('#btnConfirmarEmail').off('click').on('click', function() {
-            enviarNotificacionEmail(id);
+            enviarNotificacionEmail(id, tipo);
         });
 
         $('#modalEmail').modal('show');
@@ -765,15 +775,17 @@ $(document).ready(function() {
 });
 
 // Función para enviar notificación por email
-function enviarNotificacionEmail(id) {
-    console.log('Enviando email para ID:', id);
+function enviarNotificacionEmail(id, tipo) {
+    console.log('Enviando email para ID:', id, tipo);
 
     const btn = $('#btnConfirmarEmail');
     btn.html('<span class="spinner-border spinner-border-sm me-1"></span> Enviando...');
     btn.prop('disabled', true);
 
+    const endpoint = tipo === 'por_vencer' ? 'notificar-email-por-vencer' : 'notificar-email';
+
     $.ajax({
-        url: `${window.APP.baseUrl}/operadores/${id}/notificar-email`,
+        url: `${window.APP.baseUrl}/operadores/${id}/${endpoint}`,
         method: 'POST',
         data: {
             _token: $('meta[name="csrf-token"]').attr('content')

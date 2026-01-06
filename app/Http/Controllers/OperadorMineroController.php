@@ -337,6 +337,68 @@ class OperadorMineroController extends Controller
     }
 
     /**
+     * Enviar notificacion por Email (documentos por vencer)
+     */
+    public function notificarEmailPorVencer($id)
+    {
+        try {
+            $operador = operador_minero::find($id);
+
+            if (!$operador) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Operador no encontrado.'
+                ], 404);
+            }
+
+            if (!$operador->email_op_min) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El operador no tiene correo electronico registrado.'
+                ], 400);
+            }
+
+            $mensajePorVencer = $this->mensajeOperadorPorVencer($operador);
+
+            if (empty($mensajePorVencer)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El operador no tiene documentos por vencer en los proximos 10 dias.'
+                ], 400);
+            }
+
+            $htmlCorreo = $this->generarHTMLCorreo($operador, $mensajePorVencer, 'por_vencer');
+
+            Mail::send([], [], function ($message) use ($operador, $htmlCorreo) {
+                $message->from(config('mail.from.address'), config('mail.from.name'))
+                    ->to($operador->email_op_min)
+                    ->subject('NOTIFICACION IMPORTANTE - DOCUMENTOS POR VENCER')
+                    ->html($htmlCorreo);
+            });
+
+            $email = new Email();
+            $email->destino = $operador->email_op_min;
+            $email->asunto = 'NOTIFICACION EMAIL - DOCUMENTOS POR VENCER';
+            $email->detalle = $mensajePorVencer;
+            $email->fecha_emision = now();
+            $email->id_operador_minero = $operador->id_operador_minero;
+            $email->estado = 1;
+            $email->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notificacion enviada exitosamente a ' . $operador->email_op_min
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Obtener mensaje para WhatsApp
      */
     public function obtenerMensajeWhatsApp($id)
@@ -499,17 +561,67 @@ public function registrarWhatsAppEnvio(Request $request, $id)
     }
 
     /**
+     * Generar mensaje de documentos por vencer (proximos 10 dias)
+     */
+    public function mensajeOperadorPorVencer(operador_minero $operador): string
+    {
+        $mensajes = [];
+        $hoy = Carbon::now()->startOfDay();
+        $limite = Carbon::now()->addDays(10)->startOfDay();
+
+        if ($operador->fecha_expiracion) {
+            $fecha = Carbon::parse($operador->fecha_expiracion)->startOfDay();
+            if ($fecha->gte($hoy) && $fecha->lte($limite)) {
+                $dias = $hoy->diffInDays($fecha, false);
+                $mensajes[] = "IDOM por vencer en {$dias} dias (fecha: {$fecha->format('d/m/Y')})";
+            }
+        }
+
+        if ($operador->fecha_exp_nim) {
+            $fecha = Carbon::parse($operador->fecha_exp_nim)->startOfDay();
+            if ($fecha->gte($hoy) && $fecha->lte($limite)) {
+                $dias = $hoy->diffInDays($fecha, false);
+                $mensajes[] = "NIM por vencer en {$dias} dias (fecha: {$fecha->format('d/m/Y')})";
+            }
+        }
+
+        if (
+            $operador->actor_minero == 3 &&
+            $operador->fecha_exp_funda
+        ) {
+            $fecha = Carbon::parse($operador->fecha_exp_funda)->startOfDay();
+            if ($fecha->gte($hoy) && $fecha->lte($limite)) {
+                $dias = $hoy->diffInDays($fecha, false);
+                $mensajes[] = "SEPREC por vencer en {$dias} dias (fecha: {$fecha->format('d/m/Y')})";
+            }
+        }
+
+        return implode('. ', $mensajes);
+    }
+
+    /**
      * Generar HTML profesional para el correo
      */
-    private function generarHTMLCorreo(operador_minero $operador, string $mensajeVencimiento): string
+    private function generarHTMLCorreo(operador_minero $operador, string $mensajeVencimiento, string $tipo = 'vencidos'): string
     {
+        $esPorVencer = $tipo === 'por_vencer';
+        $tituloCorreo = $esPorVencer
+            ? 'Notificacion - Documentos por Vencer'
+            : 'Notificacion - Documentos Vencidos';
+        $descripcionCorreo = $esPorVencer
+            ? 'Le informamos que tiene documentos por vencer en los proximos 10 dias:'
+            : 'Le informamos que tiene documentos vencidos que requieren su atencion inmediata:';
+        $accionCorreo = $esPorVencer
+            ? 'Por favor, actualice sus documentos antes de la fecha de vencimiento para evitar inconvenientes.'
+            : 'Por favor, actualice sus documentos a la brevedad posible para evitar inconvenientes en sus tramites.';
+
         return "
         <!DOCTYPE html>
         <html lang='es'>
         <head>
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-            <title>Notificación - Documentos Vencidos</title>
+            <title>{$tituloCorreo}</title>
         </head>
         <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;'>
             <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #f4f4f4; padding: 20px;'>
@@ -536,7 +648,7 @@ public function registrarWhatsAppEnvio(Request $request, $id)
                                     </h2>
 
                                     <p style='color: #374151; line-height: 1.6; margin: 0 0 20px 0; font-size: 15px;'>
-                                        Le informamos que tiene documentos vencidos que requieren su atención inmediata:
+                                        {$descripcionCorreo}
                                     </p>
 
                                     <div style='background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0; border-radius: 4px;'>
@@ -571,7 +683,7 @@ public function registrarWhatsAppEnvio(Request $request, $id)
 
                                     <div style='background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 4px;'>
                                         <p style='color: #1e40af; margin: 0; font-size: 14px;'>
-                                            <strong>⚡ Acción requerida:</strong> Por favor, actualice sus documentos a la brevedad posible para evitar inconvenientes en sus trámites.
+                                            <strong>⚡ Acción requerida:</strong> {$accionCorreo}
                                         </p>
                                     </div>
 
