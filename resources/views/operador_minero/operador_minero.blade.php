@@ -166,6 +166,7 @@
                                 </th>
                                 <th class="text-nowrap p-1 small" style="width: 180px; max-width: 180px;">RAZÓN SOCIAL</th>
                                 <th class="text-nowrap p-1 small" style="width: 140px;">REPRESENT.</th>
+                                <th class="text-nowrap p-1 small" style="width: 140px;">EMAIL</th>
                                 <th class="text-nowrap p-1 small text-center" style="width: 60px;">TIPO</th>
                                 <th class="text-nowrap p-1 small" style="width: 110px;">NIM</th>
                                 <th class="text-nowrap p-1 small" style="width: 110px;">SEPREC</th>
@@ -240,6 +241,11 @@
                                 <td class="p-1 small" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
                                     title="{{ $producto->nombre_rep_legal }}{{ $producto->ci_rep_legal ? ' - CI: ' . $producto->ci_rep_legal : '' }}">
                                     {{ Str::limit($producto->nombre_rep_legal, 20) }}
+                                </td>
+                                {{-- EMAIL - COMPACTO --}}
+                                <td class="p-1 small" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                    title="{{ $producto->email_op_min }}">
+                                    {{ Str::limit($producto->email_op_min, 40) }}
                                 </td>
 
                                 {{-- TIPO --}}
